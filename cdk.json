@@ -1,5 +1,5 @@
 {
-  "app": "npx ts-node --prefer-ts-exts bin/aws-cdk-namespace-deployment-web.ts",
+  "app": "npx ts-node -r dotenv/config --prefer-ts-exts bin/aws-cdk-namespace-deployment-web.ts",
   "watch": {
     "include": [
       "**"
