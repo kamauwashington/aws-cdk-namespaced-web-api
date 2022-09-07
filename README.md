@@ -43,6 +43,7 @@ This Stack requires three environment variables
  * APPLICATION_NAME
  * NAMESPACE
  * DOMAIN_NAME
+ * CERTIFICATE_ARN (this must be a certificate in the us-east-1 region)
 
 These can be passed in from the command line, set for the current user or machine, provided during the CICD process or using a **.env** file (for local only). The **cdk.json** file has been changed to support **dotenv** using the _-r_ nodejs option.
 

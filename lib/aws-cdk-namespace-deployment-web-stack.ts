@@ -1,8 +1,7 @@
  import * as path from 'path';
 
 import { Construct } from 'constructs';
-import DOMAIN_NAME from '../src/constants/domain-name.const';
-import NAMESPACE from '../src/constants/namespace.const';
+import { CERTIFICATE_ARN, DOMAIN_NAME, NAMESPACE } from '../src/constants/common.constants';
 
 
 // CDK resources
@@ -16,7 +15,10 @@ import {
   CloudFrontAllowedMethods
 } from 'aws-cdk-lib/aws-cloudfront';
 import { HostedZone, IHostedZone, AaaaRecord, RecordTarget } from 'aws-cdk-lib/aws-route53';
-import { DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
+import {
+	DnsValidatedCertificate,
+	Certificate,
+} from 'aws-cdk-lib/aws-certificatemanager';
 import { CloudFrontTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
@@ -97,32 +99,25 @@ export class AwsCdkNamespaceDeploymentWebStack extends CDK.Stack {
 			this,
 			`${NAMESPACE} Hosted Zone`,
 			{
-				domainName: DOMAIN_NAME, // should be able to be pulled from DOMAIN_NAME environment variable
+				domainName: DOMAIN_NAME as string, // should be able to be pulled from DOMAIN_NAME environment variable
 			}
 		);
-
-		/*
-		 * We need to use the wildcard certificate for this subdomain (as we want to test via https).
-		 * This lookup can be performed via ARN, however by DNS seems cleaner as we already have the
-		 * full domain which would resolve via DNS to use the wildcard certificate
-		 */
-		const wildCardCertificateFromDNS: DnsValidatedCertificate =
-			new DnsValidatedCertificate(this, `${NAMESPACE} wildcard certificate`, {
-				domainName: domainWithNamespace,
-				hostedZone: hostedZone,
-			});
+    
+    
+    const wildCardCertificateFromDNS = Certificate.fromCertificateArn(
+			this,
+			'using ARN',
+			CERTIFICATE_ARN as string
+		);
+    
 
 		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ APIGW ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 
 		const api = new RestApi(this, `${NAMESPACE} Rest Api`, {
 			description: `API for ${NAMESPACE} environment`,
-			deployOptions: {
-				stageName: 'prod',
-			},
-			// domainName: {
-			// 	domainName: NAMESPACE,
-			// 	certificate : wildCardCertificateFromDNS
-      // },
+			// deployOptions: {
+			// 	stageName: 'prod',
+			// },
       restApiName : NAMESPACE
 		});
 
